@@ -46,10 +46,11 @@ inputs in /home  ─stage→  job runs in /expanse/lustre/scratch  ─copy→  r
 
 - **`/home`** holds your scripts and inputs — persistent and backed up, but slow and small.
 - **`/expanse/lustre/scratch/.../temp_project`** is where the job actually computes — fast
-  Lustre, but **not backed up and periodically purged**. Our scripts make a per-job
-  `WORKDIR` here (keyed on `${SLURM_JOB_ID}`) and `cd` into it.
-- Because scratch is purged, the job **copies results back** to `/home` (or you download
-  them) before they vanish. Don't leave anything you care about only in scratch.
+  Lustre, **not backed up** (a purge policy exists but hasn't been biting — see
+  [docs/01](docs/01-filesystems.md)). Our scripts make a per-job `WORKDIR` here (keyed on
+  `${SLURM_JOB_ID}`) and `cd` into it.
+- Since scratch isn't backed up, the job **copies results back** to `/home` (or you download
+  them). Don't leave anything you care about *only* in scratch.
 
 See [docs/01-filesystems.md](docs/01-filesystems.md) for the full breakdown.
 

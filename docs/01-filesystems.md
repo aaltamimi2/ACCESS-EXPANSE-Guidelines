@@ -8,7 +8,7 @@ wrong place is the #1 cause of slow jobs and lost data.
 | | Path | Backed up? | Purged? | Speed | Use for |
 |---|---|---|---|---|---|
 | **Home** | `/home/aaltamimi` | ✅ yes | ❌ no | slow (NFS) | code, scripts, configs, small inputs |
-| **Scratch** | `/expanse/lustre/scratch/aaltamimi/temp_project` | ❌ no | ✅ ~purged when idle | fast (Lustre parallel) | **run jobs here**, trajectories, big I/O |
+| **Scratch** | `/expanse/lustre/scratch/aaltamimi/temp_project` | ❌ no | ⚠️ purge policy exists (not biting in practice) | fast (Lustre parallel) | **run jobs here**, trajectories, big I/O |
 | **Projects** | `/expanse/lustre/projects/<alloc>` | ❌ no | per-allocation | fast (Lustre) | data shared across the allocation |
 
 **Rule of thumb:** *Keep* things in home, *compute* in scratch.
@@ -28,8 +28,17 @@ wrong place is the #1 cause of slow jobs and lost data.
 
 ## Scratch — `/expanse/lustre/scratch/aaltamimi/temp_project`
 
-- Lustre parallel filesystem: **fast, large**, but **NOT backed up** and **purged** when
-  files go untouched (Expanse policy is ~90 days). Treat everything here as disposable.
+- Lustre parallel filesystem: **fast, large**, but **NOT backed up**. SDSC documents a
+  purge policy (files untouched for an extended period may be removed, and the admins run
+  emergency purges when the filesystem fills — it's been ~88% full of 11 PB). **In practice
+  our files have persisted 5+ months** (Jan 2026 content was still here in Jun 2026, including
+  files untouched for 120+ days), so the nominal "~90 day" purge is not actively biting today.
+  Still: it's not backed up, so **treat everything here as disposable** and keep copies of
+  anything important elsewhere.
+
+  > Note on purge timing: purge is based on **access** time (`atime`), not modification time.
+  > A `find`/`du`/`ls -R` sweep over the tree resets directory atimes and can mask which data
+  > is genuinely stale — don't rely on "it survived" as proof a file is safe.
 - This is where jobs actually run. Our scripts create a per-job working dir here:
   ```bash
   WORKDIR="/expanse/lustre/scratch/$USER/temp_project/METAD-...-${SLURM_JOB_ID}"
