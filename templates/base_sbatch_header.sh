@@ -2,7 +2,7 @@
 # =============================================================================
 # BASE SBATCH HEADER — job-agnostic starting point for Expanse (account wis192)
 # Copy this, rename, fill in the marked fields, then add your job body below.
-# Edit locally, scp up, submit on Expanse. Never edit on Expanse.
+# Keep a version-controlled copy, scp up, submit on Expanse.
 # =============================================================================
 
 #SBATCH --job-name=CHANGE_ME          # short name shown in squeue

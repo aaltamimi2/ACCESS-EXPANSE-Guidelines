@@ -5,7 +5,7 @@ filesystems, Python environments, and — the core of this guide — how to writ
 submit SLURM batch (`.sh`) scripts, built from our own real examples.
 
 - **Account:** `wis192`  ·  **User:** `aaltamimi`  ·  **Login:** `ssh expanse` (lands on `login02`)
-- All examples here are **copied from Expanse, edited only locally.** See the golden rule below.
+- All examples here are real scripts copied from Expanse. See the workflow notes below.
 
 ---
 
@@ -35,27 +35,36 @@ A shared, job-agnostic header template lives in [`templates/base_sbatch_header.s
 
 ---
 
-## The golden rule: edit locally, never on Expanse
+## How work flows: home → scratch → back
 
-**Nothing in this guide is edited on Expanse.** The workflow is always:
+The part that actually matters is **where a job runs**, not where you type. A job's data
+moves through three places:
 
 ```
-edit on laptop  ─scp→  Expanse  ─sbatch→  job runs in scratch  ─scp→  results back
+inputs in /home  ─stage→  job runs in /expanse/lustre/scratch  ─copy→  results you keep
 ```
 
-1. Edit `.sh` / inputs **here** (in this repo / locally).
-2. Copy up with **`scp`** (never `rsync` — see CLAUDE.md):
-   ```bash
-   scp submit_sweep_S13.sh expanse:/home/aaltamimi/30CMC-CAMPAIGN/02-PRODUCTION/SDS/
-   ```
-3. SSH in and submit:
-   ```bash
-   ssh expanse
-   cd 30CMC-CAMPAIGN/02-PRODUCTION/SDS && sbatch submit_sweep_S13.sh
-   ```
-4. The job stages inputs from `/home`, **runs in `/expanse/lustre/scratch`**, and copies results back.
+- **`/home`** holds your scripts and inputs — persistent and backed up, but slow and small.
+- **`/expanse/lustre/scratch/.../temp_project`** is where the job actually computes — fast
+  Lustre, but **not backed up and periodically purged**. Our scripts make a per-job
+  `WORKDIR` here (keyed on `${SLURM_JOB_ID}`) and `cd` into it.
+- Because scratch is purged, the job **copies results back** to `/home` (or you download
+  them) before they vanish. Don't leave anything you care about only in scratch.
 
-This keeps the Expanse copy a deploy target only — the source of truth stays version-controlled locally.
+See [docs/01-filesystems.md](docs/01-filesystems.md) for the full breakdown.
+
+### Editing scripts — a suggestion, not a rule
+
+You *can* edit on Expanse (vim is there and fine for a quick tweak). But for anything
+you want to keep, it's worth editing in a version-controlled copy (like this repo) and
+copying up — so the script that produced a result isn't lost when scratch is purged or a
+home file is overwritten. When you do copy, use **`scp`**, not `rsync` (see CLAUDE.md):
+
+```bash
+scp submit_sweep_S13.sh expanse:/home/aaltamimi/30CMC-CAMPAIGN/02-PRODUCTION/SDS/
+ssh expanse
+cd 30CMC-CAMPAIGN/02-PRODUCTION/SDS && sbatch submit_sweep_S13.sh
+```
 
 ---
 
