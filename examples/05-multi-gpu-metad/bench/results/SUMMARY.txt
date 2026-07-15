@@ -1,0 +1,10 @@
+S_1gpu                            427.767   (rc=0, 57s)
+S_2gpu_ppPME                      236.446   (rc=0, 56s)
+B_1gpu                            124.115   (rc=0, 56s)
+B_2gpu_ppPME                       65.216   (rc=0, 56s)
+B_2gpu_ppPME_updGPU                67.919   (rc=0, 56s)
+B_1gpu_plumed                      69.088   (rc=0, 57s)
+B_2gpu_plumed                      68.655   (rc=0)
+T_walker0_GPU0                    123.840   big, concurrent
+T_walker1_GPU1                    124.139   big, concurrent
+T_aggregate_2walkers               247.98   sum

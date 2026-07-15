@@ -1,0 +1,53 @@
+########################################################################
+# Multi-GPU GROMACS benchmark evidence  (Expanse V100, job 52093822)
+# Engine: euler_0.0.sif = GROMACS 2021.5 + PLUMED 2.8.0
+# Systems: TIP3P water (PME), amber99sb-ildn, energy-minimized
+########################################################################
+
+===== ns/day SUMMARY =====
+S_1gpu                            427.767   (rc=0, 57s)
+S_2gpu_ppPME                      236.446   (rc=0, 56s)
+B_1gpu                            124.115   (rc=0, 56s)
+B_2gpu_ppPME                       65.216   (rc=0, 56s)
+B_2gpu_ppPME_updGPU                67.919   (rc=0, 56s)
+B_1gpu_plumed                      69.088   (rc=0, 57s)
+B_2gpu_plumed                      68.655   (rc=0)
+T_walker0_GPU0                    123.840   big, concurrent
+T_walker1_GPU1                    124.139   big, concurrent
+T_aggregate_2walkers               247.98   sum
+
+===== WHY single-job 2-GPU is SLOWER: B_2gpu_ppPME cycle accounting (191k atoms) =====
+                     Ranks Threads  Count      (s)         total sum    %
+ Domain decomp.         1   10        103       1.306         32.568   2.4
+ Send X to PME          1   10      10250       5.103        127.258   9.4
+ Neighbor search        1   10        103       0.806         20.089   1.5
+ Force                  1   10      10250       0.238          5.929   0.4
+ PME mesh *             1   10      10250       7.490        186.801  13.8
+ PME wait for PP *                             19.668        490.500  36.2
+ Wait + Recv. PME F     1   10      10250       4.309        107.467   7.9
+ Wait PME GPU gather    1   10      10250       7.058        176.009  13.0
+ Wait GPU NB local      1   10      10250      11.215        279.688  20.6
+ Comm. energies         1   10       1025       0.002          0.043   0.0
+ Total                                         27.159       1354.605 100.0
+(*) Note that with separate PME ranks, the walltime column actually sums to
+
+  NOTE emitted by GROMACS:
+NOTE: Your choice of number of MPI ranks and amount of resources results in using 10 OpenMP threads per rank, which is most likely inefficient. The optimum is usually between 2 and 6 threads per rank.
+
+===== GPU utilization: single-job 2-GPU split (dmon, sm% per GPU) =====
+  (representative samples during B_2gpu_ppPME; gpu0=PP, gpu1=PME)
+ 21:00:07   gpu0(PP)=47%   gpu1(PME)=31%
+ 21:00:10   gpu0(PP)=47%   gpu1(PME)=31%
+ 21:00:13   gpu0(PP)=47%   gpu1(PME)=31%
+ 21:00:16   gpu0(PP)=47%   gpu1(PME)=31%
+ 21:00:19   gpu0(PP)=46%   gpu1(PME)=30%
+  --> both GPUs ACTIVE (partition works) but BOTH UNDERUTILIZED: the PME GPU
+      idles ~30% waiting for PP, and neither GPU is saturated. This is why the
+      split runs at ~0.53x of a single GPU.
+
+===== GPU utilization: 2 independent walkers (LIVE nvidia-smi) =====
+0, 90 %, 432 MiB, 269.70 W
+1, 91 %, 434 MiB, 239.48 W
+T_walker0_GPU0                    123.840   big, concurrent
+
+Both GPUs ~90% under multiple-walkers vs ~48%/30% in the single-job split.

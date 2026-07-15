@@ -24,12 +24,15 @@ The other examples build on it:
 | 02 | [GPU ML training](examples/02-gpu-ml-training/) | Same skeleton, Python/PyTorch workload instead of MD |
 | 03 | [GPU job w/ QOS + email](examples/03-gpu-qos-mail/) | `--qos`, `--mail-*`, Singularity TMPDIR/CACHEDIR env vars |
 | 04 | [Batch submitter](examples/04-batch-submitter/) | A wrapper that loops and calls `sbatch` many times (not a job itself) |
+| 05 | [Multi-GPU metadynamics](examples/05-multi-gpu-metad/) | Using **2+ GPUs**: single-job PP\|PME split vs multiple-walkers — with real Expanse benchmarks showing which actually wins |
 
-Each example folder contains **three files**:
+Examples **01–04** each contain **three files**:
 
 1. `*.sh` — the **original** script, exactly as it runs on Expanse.
 2. `template.sh` — the same job stripped to the **`#SBATCH` header block + a commented skeleton** you fill in.
 3. `README.md` — a line-by-line walkthrough.
+
+Example **05** is a benchmark-backed deep-dive (its own README + a `bench/` harness) answering "how do I run this on multiple GPUs?"
 
 A shared, job-agnostic header template lives in [`templates/base_sbatch_header.sh`](templates/base_sbatch_header.sh).
 
